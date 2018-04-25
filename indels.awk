@@ -31,7 +31,7 @@ function random_insert() {
 
 BEGIN{srand()}
 {
-	if(rand()<0.2) {
+	if(rand()<0.2) {	# we are adding indels only for 20% of SNPs
 			where = rand()
 			if(where<=0.25) {
 					start = nearby($2,10.0)
