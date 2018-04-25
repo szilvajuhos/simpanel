@@ -17,7 +17,7 @@ Software/data used:
 ## Steps to build the normal dataset:
 
 ### Create reference fasta
-The bed file `panel\_hg19.bed` contains gene regions to be cut from the HG19 FASTA file. These coordinates were actually lifted over from 
+The bed file `panel_hg19.bed` contains gene regions to be cut from the HG19 FASTA file. These coordinates were actually lifted over from 
 GRCh38. This file should not be treated as a concise list of tumour genes whatsoever.
 
 ```
@@ -37,7 +37,7 @@ wgsim -N 70000000 -1 151 -2 151 tumor_panel_37.fasta\
 panel_37_N_R1.fastq panel_37_N_R2.fastq 2>&1 | tee variations.txt
 ```
 
-While $$reference\_length\*coverage/(2\*readlength) = number\_of\_reads$$ therefore, $$coverage = 2\*readlength\*number\_of\_reads/reference\_length$$
+While reference\_length\*coverage/(2\*readlength) = number\_of\_reads therefore, $coverage = 2\*readlength\*number\_of\_reads/reference\_length$
 
 2x151x70000000/191942266 = 110 coverage can be achieved.
 
@@ -46,7 +46,8 @@ While $$reference\_length\*coverage/(2\*readlength) = number\_of\_reads$$ theref
 Use `bwa` for alignment. You have to have the indexed version of HG19 to do this, if not, start `bwa index hg19.fa` in your lunchbreak. We are using 16 
 CPU cores here (`-t 16`) for each process, the alignment takes about two hours:
 ```
-bwa mem -t 16 -M hg19.fa panel_37_N_R1.fastq.gz panel_37_N_R2.fastq.gz| samtools sort --threads 16 -m 4G - > normal_panel.bam
+bwa mem -t 16 -M hg19.fa panel_37_N_R1.fastq.gz panel_37_N_R2.fastq.gz\
+| samtools sort --threads 16 -m 4G - > normal_panel.bam
 samtools index normal_panel.bam
 ```
 Now we have a BAM file with germline normal mutations. With bamsurgeon we can add SNPs and indels. To add a single SNP with 0.5 allele frequency to each 
@@ -59,11 +60,17 @@ $ awk '{coord=$2+($3-$2)/2;printf("%s %d %d %2.2f\n",$1,coord,coord,0.5)}'  pane
 ```
 Of course the result was redirected to `SNPs.var`. We can run the appropriate bamsurgeon command now:
 ```
-bamsurgeon $ python bin/addsnv.py -v /path/to/SNPs.var -f /path/to/normal_panel.bam -r /path/to/hg19.fa -o /path/to/tumour_panel_SNPs_37.bam
+bamsurgeon $ python bin/addsnv.py \
+    -v /path/to/SNPs.var\
+    -f /path/to/normal_panel.bam\
+    -r /path/to/hg19.fa\
+    -o /path/to/tumour_panel_SNPs_37.bam
 ```
-Once `tumour_panel_SNPs_37.bam` has been created, it have to be sorted and indexed. The tougher part is now to generate indels. Wrote an awk script that 
-randomly makes indels around SNPs using the SNPs.var file generated earlier: half of indels are close to the SNPs ($+-10 bps$) and the rest are far from 
-them, so we can have a look at the effect of indel realignment:
+Once `tumour_panel_SNPs_37.bam` has been created, it have to be sorted and indexed. The tougher part is now to generate indels. Wrote an 
+[awk script](https://github.com/szilvajuhos/simpanel/blob/master/indels.awk) that randomly makes indels around SNPs using the SNPs.var file 
+generated earlier: half of indels are close to the SNPs ($+-10 bps$) and the rest are far from them, so we can have a look at the effect of 
+indel realignment:
+
 ```
 awk -f indels.awk SNPs.var |sort -n -k1,1n -n > indels.var
 cd /path/to/bamsurgeon
