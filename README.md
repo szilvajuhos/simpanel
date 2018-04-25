@@ -37,8 +37,7 @@ wgsim -N 70000000 -1 151 -2 151 tumor_panel_37.fasta\
 panel_37_N_R1.fastq panel_37_N_R2.fastq 2>&1 | tee variations.txt
 ```
 
-While reference\_length\*coverage/(2\*readlength) = number\_of\_reads therefore, $coverage = 2\*readlength\*number\_of\_reads/reference\_length$
-
+While reference\_length\*coverage/(2\*readlength) = number\_of\_reads therefore, coverage = 2\*readlength\*number\_of\_reads/reference\_length 
 2x151x70000000/191942266 = 110 coverage can be achieved.
 
 ### Align normal reads to make a normal BAM:
@@ -74,7 +73,11 @@ indel realignment:
 ```
 awk -f indels.awk SNPs.var |sort -n -k1,1n -n > indels.var
 cd /path/to/bamsurgeon
-python bin/addindel.py -v /path/to/indels.var -f /path/to/tumour_panel_SNPs_37_sorted.bam -r /path/to/hg19.fa -o /path/to/tumour_panel_SNPs_and_indels_37.bam
+bamsurgeon $ python bin/addindel.py\
+    -v /path/to/indels.var\
+    -f /path/to/tumour_panel_SNPs_37_sorted.bam\
+    -r /path/to/hg19.fa\
+    -o /path/to/tumour_panel_SNPs_and_indels_37.bam
 ```
 This file also needs to be sorted/indexed if you want to have a look at in IGV. These two BAM files already can be used for variant call benchmarking, but 
 have to extract FASTQs for alignment testing using something like [bam2fastq.sh](https://github.com/NationalGenomicsInfrastructure/ngi_pipeline/blob/master/scripts/bam2fastq.sh)
