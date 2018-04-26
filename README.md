@@ -80,5 +80,14 @@ bamsurgeon $ python bin/addindel.py\
     -o /path/to/tumour_panel_SNPs_and_indels_37.bam
 ```
 This file also needs to be sorted/indexed if you want to have a look at in IGV. These two BAM files already can be used for variant call benchmarking, but 
-have to extract FASTQs for alignment testing using something like [bam2fastq.sh](https://github.com/NationalGenomicsInfrastructure/ngi_pipeline/blob/master/scripts/bam2fastq.sh)
+have to extract FASTQs for alignment testing using something like the `bam2fastq.sh` script (it need tailoring to your needs). 
+
+The tumour FASTQ files actually need some tweaking still: FreeBayes is not happy if the read names/read groups are the same, so I have added an extra T for each 
+readname like:
+```
+awk '/^@/{sub("^@","@T");print;for(i=0;i<3;i++){getline;print}}' file.fastq > newfile.fastq
+```
+
+Once the `fastq.gz` are ready, you can add these to Sarek for testing ;)
+
 
