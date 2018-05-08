@@ -21,7 +21,7 @@ The bed file `panel_hg19.bed` contains gene regions to be cut from the HG19 FAST
 GRCh38. This file should not be treated as a concise list of tumour genes whatsoever.
 
 ```
- bedtools getfasta -fi hg19.fa -bed panel\_hg19.bed.bed > tumor_panel_37.fasta
+ bedtools getfasta -fi hg19.fa -bed panel\_hg19.bed.bed -fo tumor_panel_37.fasta
 ```
 
 ### Generate normal reads
@@ -77,16 +77,30 @@ bamsurgeon $ python bin/addindel.py\
     -v /path/to/indels.var\
     -f /path/to/tumour_panel_SNPs_37_sorted.bam\
     -r /path/to/hg19.fa\
+		--force \
     -o /path/to/tumour_panel_SNPs_and_indels_37.bam
 ```
 This file also needs to be sorted/indexed if you want to have a look at in IGV. These two BAM files already can be used for variant call benchmarking, but 
-have to extract FASTQs for alignment testing using something like the `bam2fastq.sh` script (it need tailoring to your needs). 
+have to extract FASTQs for alignment testing using something like the `bam2fastq.sh` script (it needs tailoring to your needs). 
 
 The tumour FASTQ files actually need some tweaking still: FreeBayes is not happy if the read names/read groups are the same, so I have added an extra T for each 
 readname like:
 ```
 awk '/^@/{sub("^@","@T");print;for(i=0;i<3;i++){getline;print}}' file.fastq > newfile.fastq
 ```
+
+Also, qualities are not really random, so to make it similar to real data, we have to exchange qualities with the help of real data. First keep only reads that are 151 bps long, than 
+use a python script to exchange qualities:
+```
+for f in 1 2; do 
+	awk '/^@/{id=$0;getline;seq=$0;getline;getline;qual=$0;if(length(seq)==151){print id;print seq; print "+";print qual}}'   real_data_R${f}.fastq > qual_in.R${f}.fastq
+	./exchangeQuality.py -t simulated_R${f}.fastq -s qual_in.R${f}.fastq > to_align_R${f}.fastq
+done
+
+
+```
+
+
 
 Once the `fastq.gz` are ready, you can add these to Sarek for testing ;)
 
