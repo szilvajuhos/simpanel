@@ -1,0 +1,12 @@
+##fileformat=VCFv4.1
+##SAMPLE=<ID=SOMATIC,Individual="TRUTH",Description="bamsurgeon spike-in">
+##INFO=<ID=DP,Number=1,Type=Float,Description="Avg Depth in Region">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##reference=human_g1k_v37_decoy.fasta
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	SOMATIC
+1	226254627	.	A	G	100	PASS	DP=89	GT	1/1
+1	226254669	.	GAA	G	100	PASS	DP=91	GT	1/1
+1	248613909	.	T	TTA	100	PASS	DP=102	GT	1/1
+1	248613919	.	G	A	100	PASS	DP=98	GT	1/1
+7	44148980	.	GGA	G	100	PASS	DP=101	GT	1/1
+7	44149060	.	C	A	100	PASS	DP=105	GT	1/1
